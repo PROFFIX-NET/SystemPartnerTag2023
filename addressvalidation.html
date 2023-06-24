@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="de">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Adressvalidation</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+</head>
+
+<body>
+  <div class="container-fluid">
+    <div id="messages" class="mt-3">
+      <div id="pending" class="d-none card">
+        <div class="card-header text-center fs-1"><i class="bi bi-hourglass-split"></i></div>
+        <div class="card-body">Adressvalidierung läuft</div>
+      </div>
+      <div id="error" class="d-none card border-danger">
+        <div class="card-header text-center fs-1 text-bg-danger"><i class="bi bi-exclamation-triangle"></i></div>
+        <div class="card-body" id="errorMsg"></div>
+      </div>
+      <div id="domicile_certified" class="d-none card border-success">
+        <div class="card-header text-center fs-1 text-bg-success"><i class="bi bi-check-all"></i></div>
+        <div class="card-body">Adresse inkl. Name wurde verfiziert</div>
+      </div>
+      <div id="certified" class="d-none card border-success">
+        <div class="card-header text-center fs-1 text-bg-success"><i class="bi bi-check"></i></div>
+        <div class="card-body">Adresse ohne Name wurde verfiziert</div>
+      </div>
+      <div id="usable" class="d-none card border-warning">
+        <div class="card-header text-center fs-1 text-bg-warning"><i class="bi bi-question-circle"></i></div>
+        <div class="card-body">Adress ist ungenau</div>
+      </div>
+      <div id="fixed" class="d-none card border-warning">
+        <div class="card-header text-center fs-1 text-bg-warning"><i class="bi bi-question-circle"></i></div>
+        <div class="card-body">Adress ist ungenau<br>Verbesserungsvorschlag:</div>
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item" id="fixProposal"></li>
+        </ul>
+        <div class="card-body d-grid gap-2">
+          <button type="button" id="fixButton" class="btn btn-sm btn-primary">Übernehmen</button>
+          <button type="button" id="fixCloseButton" class="btn btn-sm btn-outline-primary">Übernehmen und
+            Schliessen</button>
+        </div>
+      </div>
+      <div id="unusable" class="d-none card border-danger">
+        <div class="card-header text-center fs-1 text-bg-danger"><i class="bi bi-exclamation-triangle"></i></div>
+        <div class="card-body">Adresse ist nicht verwendbar</div>
+      </div>
+      <div id="compromised" class="d-none card border-danger">
+        <div class="card-header text-center fs-1 text-bg-danger"><i class="bi bi-exclamation-triangle"></i></div>
+        <div class="card-body">Adresse wurde von Drittpersonen modifiziert</div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    // TODO Importiere Px5AddInConnector
+
+    // Werte aus der Px5 Eingabemaske
+    var px5AdressFields = { firstname: "", lastname: "", street: "", streetnr: "", zip: "", city: "" };
+
+    // Validation payload aus der Post API
+    var validationResponsePayload = { quality: "", address: { addressee: { firstName: "", lastName: "" }, geographicLocation: { house: { street: "", houseNumber: "" }, zip: { zip: "", city: "" } } } };
+
+    // TODO Initialisiere Px5AddInConnector
+
+    // TODO Alle Controls aus Px5 anfordern
+
+    /**
+     * Verarbeitet Nachrichten aus Px5
+     * @param msg Nachricht aus Px5
+     */
+    async function handleMessagesFromPx5(msg) {
+
+      // TODO Verarbeite Nachrichten aus Px5
+
+    }
+
+    /**
+     * Aktualisiert die Werte, welche aus der Post API empfangen wurden, in der Px5 Eingabemaske
+     * @param {boolean} closeWindow Wenn true wird die Maske geschlossen und die Werte gespeichert
+     */
+    function updateAdressInPx5(closeWindow) {
+
+      // TODO Aktualisiere die Adresse in der Px5 Eingabemaske anhand des Vorschlags
+
+    }
+
+    /**
+     * Ruft die Validierung aus der Post API ab und aktualisiert die globale Variable 'validationResponsePayload'
+     */
+    async function getValidationFromApi() {
+
+      // Login
+      const tokenResponse = await fetch("https://wedec.post.ch/OAuth/token?grant_type=client_credentials&client_id=26c783da47ee0f784f1326b351ff4128&client_secret=c771d5176b5d3bb1f4e0da1fa2ea93b0&scope=WEDEC_VALIDATE_ADDRESS", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" }
+      });
+      if (tokenResponse.status !== 200) {
+        throw new Error("HTTP Error: TokenResponse is " + tokenResponse.status);
+      }
+      const tokenResponsePayload = await tokenResponse.json();
+      if (!tokenResponsePayload.access_token) {
+        throw new Error("TokenResponse body contains unexpected data");
+      }
+      const accessToken = tokenResponsePayload.access_token;
+
+      // Validation
+      const validationPayload = {
+        addressee: {},
+        geographicLocation: {
+          house: {},
+          zip: {}
+        },
+        fullValidation: true
+      };
+      if (px5AdressFields.firstname.length > 0) validationPayload.addressee.firstName = px5AdressFields.firstname;
+      if (px5AdressFields.lastname.length > 0) validationPayload.addressee.lastName = px5AdressFields.lastname;
+      if (px5AdressFields.street.length > 0) validationPayload.geographicLocation.house.street = px5AdressFields.street;
+      if (px5AdressFields.streetnr.length > 0) validationPayload.geographicLocation.house.houseNumber = px5AdressFields.streetnr;
+      if (px5AdressFields.zip.length > 0) validationPayload.geographicLocation.zip.zip = px5AdressFields.zip;
+      if (px5AdressFields.city.length > 0) validationPayload.geographicLocation.zip.city = px5AdressFields.city;
+
+      const validationResponse = await fetch("https://wedec.post.ch/api/address/v1/addresses/validation", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + accessToken
+        },
+        body: JSON.stringify(validationPayload)
+      });
+      if (validationResponse.status !== 200) {
+        throw new Error("HTTP Error: ValidationResponse is " + validationResponse.status);
+      }
+      validationResponsePayload = await validationResponse.json();
+      if (!validationResponsePayload.quality) {
+        throw new Error("ValidationResponse body contains unexpected data");
+      }
+    }
+
+    /**
+     * Aktualisiert die View
+     * @param state Wert Quality aus der Post API or 'error' or 'pending'
+     * @param message Nachricht im Fall des States 'error'
+     */
+    function setViewState(state = "error", message = "") {
+      state = state.toLowerCase();
+      document.querySelectorAll("#messages > div").forEach(e => e.classList.add("d-none"));
+      document.querySelector("#" + state).classList.remove("d-none");
+
+      switch (state) {
+        case "error":
+          if (message == "") {
+            message = "Unbekannter Fehler ist aufgetreten"
+          } else {
+            message = "Fehler ist aufgetreten: " + message;
+          }
+          document.querySelector("#errorMsg").innerHTML = message;
+          break;
+
+        case "fixed":
+          document.querySelector("#fixProposal").innerHTML = `${validationResponsePayload.address.addressee.firstName ?? ""} ${validationResponsePayload.address.addressee.lastName ?? ""}<br>`;
+          document.querySelector("#fixProposal").innerHTML += `${validationResponsePayload.address.geographicLocation.house.street ?? ""} ${validationResponsePayload.address.geographicLocation.house.houseNumber ?? ""}<br>`;
+          document.querySelector("#fixProposal").innerHTML += `${validationResponsePayload.address.geographicLocation.zip.zip ?? ""} ${validationResponsePayload.address.geographicLocation.zip.city ?? ""}`;
+      }
+    }
+
+    // **********
+    // *** Init View
+    // **********
+    document.querySelector("#fixButton").addEventListener("click", () => updateAdressInPx5(false));
+    document.querySelector("#fixCloseButton").addEventListener("click", () => updateAdressInPx5(true));
+    setViewState("pending");
+
+  </script>
+</body>
+
+</html>
