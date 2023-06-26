@@ -56,7 +56,7 @@
   </div>
 
   <script type="module">
-    // TODO Importiere Px5AddInConnector
+    import { Px5AddInConnector } from "https://px5addinconnector.proffix.app/1/px5-add-in-connector.min.js";
 
     // Werte aus der Px5 Eingabemaske
     var px5AdressFields = { firstname: "", lastname: "", street: "", streetnr: "", zip: "", city: "" };
@@ -64,18 +64,54 @@
     // Validation payload aus der Post API
     var validationResponsePayload = { quality: "", address: { addressee: { firstName: "", lastName: "" }, geographicLocation: { house: { street: "", houseNumber: "" }, zip: { zip: "", city: "" } } } };
 
-    // TODO Initialisiere Px5AddInConnector
+    // **********
+    // *** InitPx5 Add-in Connector
+    // **********
+    const px5 = new Px5AddInConnector("AddressValidation", "1.0", "Proffix Software AG", msg => handleMessagesFromPx5(msg));
 
-    // TODO Alle Controls aus Px5 anfordern
+    // Alle Controls aus Px5 anfordern
+    px5.getControlsFromPx5();
+
 
     /**
      * Verarbeitet Nachrichten aus Px5
      * @param msg Nachricht aus Px5
      */
     async function handleMessagesFromPx5(msg) {
+      switch (msg.method) {
+        case "GetControlsFromPx5":
+          setViewState("pending");
+          px5AdressFields.firstname = msg.payload.find(el => el.controlname == "dfsVorname").value.trim();
+          px5AdressFields.lastname = msg.payload.find(el => el.controlname == "dfsName").value.trim();
+          px5AdressFields.street = msg.payload.find(el => el.controlname == "dfsStrasse").value.trim();
+          px5AdressFields.streetnr = msg.payload.find(el => el.controlname == "dfsHausNr").value.trim();
+          px5AdressFields.zip = msg.payload.find(el => el.controlname == "PLZ").value.trim();
+          px5AdressFields.city = msg.payload.find(el => el.controlname == "Ort").value.trim();
 
-      // TODO Verarbeite Nachrichten aus Px5
+          try {
+            await getValidationFromApi();
+            setViewState(validationResponsePayload.quality);
+          } catch (e) {
+            setViewState("error", e.message ?? "");
+          }
+          break;
 
+        case "ValueChangedInPx5":
+          if (msg.payload.controlname == "dfsVorname") px5AdressFields.firstname = msg.payload.value.trim();
+          if (msg.payload.controlname == "dfsName") px5AdressFields.lastname = msg.payload.value.trim();
+          if (msg.payload.controlname == "dfsStrasse") px5AdressFields.street = msg.payload.value.trim();
+          if (msg.payload.controlname == "dfsHausNr") px5AdressFields.streetnr = msg.payload.value.trim();
+          if (msg.payload.controlname == "PLZ") px5AdressFields.zip = msg.payload.value.trim();
+          if (msg.payload.controlname == "Ort") px5AdressFields.city = msg.payload.value.trim();
+
+          try {
+            await getValidationFromApi();
+            setViewState(validationResponsePayload.quality);
+          } catch (e) {
+            setViewState("error", e.message ?? "");
+          }
+          break;
+      }
     }
 
     /**
@@ -83,9 +119,22 @@
      * @param {boolean} closeWindow Wenn true wird die Maske geschlossen und die Werte gespeichert
      */
     function updateAdressInPx5(closeWindow) {
-
-      // TODO Aktualisiere die Adresse in der Px5 Eingabemaske anhand des Vorschlags
-
+      const fixedAddress = validationResponsePayload.address;
+      if (fixedAddress.addressee.firstName) px5.changeInputValueInPx5("dfsVorname", fixedAddress.addressee.firstName);
+      if (fixedAddress.addressee.lastName) px5.changeInputValueInPx5("dfsName", fixedAddress.addressee.lastName);
+      if (fixedAddress.geographicLocation.house.street) px5.changeInputValueInPx5("dfsStrasse", fixedAddress.geographicLocation.house.street);
+      if (fixedAddress.geographicLocation.house.houseNumber) px5.changeInputValueInPx5("dfsHausNr", fixedAddress.geographicLocation.house.houseNumber);
+      if (fixedAddress.geographicLocation.zip.zip) px5.changeInputValueInPx5("PLZ", fixedAddress.geographicLocation.zip.zip);
+      if (fixedAddress.geographicLocation.zip.city) px5.changeInputValueInPx5("Ort", fixedAddress.geographicLocation.zip.city);
+      px5.triggerActionInPx5("DisableControl", "dfsVorname");
+      px5.triggerActionInPx5("DisableControl", "dfsName");
+      px5.triggerActionInPx5("DisableControl", "dfsStrasse");
+      px5.triggerActionInPx5("DisableControl", "dfsHausNr");
+      px5.triggerActionInPx5("DisableControl", "PLZ");
+      px5.triggerActionInPx5("DisableControl", "Ort");
+      if (closeWindow) {
+        px5.triggerActionInPx5("PerformButtonClick", "pbtOk");
+      }
     }
 
     /**
