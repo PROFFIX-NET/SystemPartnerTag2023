@@ -3,6 +3,20 @@ Address Validation Add-In
 
 Proffix Px5 Add-In zur Validierung von Adressen über die Post Digital Commerce Address API.
 
+
+Anforderungen
+-------------
+
+Alle Stellen im Sourcecode, an denen etwas für die Erfüllung der Aufgabe gemacht werden muss, sind mit einem "TODO-Kommentar" markiert.
+Das Px5 Add-in soll folgende Anforderungen erfüllen:
+1. Beim Öffnen oder Ändern der Adresse soll diese über die Post Digital Commerce Address API validiert werden.
+   1. Für die Validierung werden folgende Felder verwendet: Vorname, Nachname, Strasse, Strassennummer, Postleitzahl, Ort
+   2. Nur bei Änderungen in den überwachten Feldern, soll eine erneute Validierung durchgeführt werden
+2. Sofern die Quality "FIXED" von der API zurückmeldet wird, soll die Adresse vom User aktualisiert werden können
+   1. Nach der Übername des Vorschlags sollen die Felder gesperrt (disabled) werden.
+   2. Über eine zweite Schaltfläche soll das Px5-Fenster geschlossen und der Adressdatensatz gespeichert werden können
+
+
 Inbetriebname der lokalen Entwicklungumgebung
 ---------------------------------------------
 
