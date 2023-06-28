@@ -51,8 +51,8 @@ Neues Zusatzfeld in Px5 auf der Tabelle _Adresse_ hinzufügen:
 - **Schritt 8:** Frei wählbare Bezeichnung für das Zusatzfeld eingeben
 - **Schritt 9:** Lokaler Pfad zur HTML-Datei (kann über lokalen Webserver erfolgen)
    - **Schritt 9a:** Installation lokaler Webserver (benötigt [NodeJS](https://nodejs.org)): `npm install live-server`
-   - **Schritt 9b:** Lokalen Webserver starten: `npx live-server --port=5000``
-   - **Schritt 9c:** URL in Zusatzfeld anpassen: http://localhost:5000
+   - **Schritt 9b:** Lokalen Webserver starten: `npx live-server --port=50080 --no-browser`
+   - **Schritt 9c:** URL in Zusatzfeld anpassen: http://localhost:50080
 
 Hilfestellungen
 ---------------
